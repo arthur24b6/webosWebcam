@@ -1,0 +1,10 @@
+{
+	"id": "com.24b6.cam",
+	"version": "1.0.0",
+	"vendor": "24b6",
+	"type": "web",
+	"main": "index.html",
+	"title": "Webcam",
+	"icon": "icon.png",
+	"uiRevision":1
+}
