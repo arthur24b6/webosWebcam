@@ -5,36 +5,68 @@ enyo.kind({
 	kind: enyo.VFlexBox,
 	components: [
 		{kind: "PageHeader", components: [
-			{content: "Foscam IP camera"}
+			{content: "Web Cameras"}
 		]},
-		{name: "cameraSettings", kind: "RowGroup", caption: "Camera information", components: [
-      {name: "cameraName", kind: "Input", flex: 1, caption: 'Camera name', hint: "Name this camera", value: ""},
-			{name: "cameraURL", kind: "Input", flex: 1, caption: 'Camera IP', hint: "IP of the camera", value: ""},
-			{name: "cameraUser", kind: "Input", flex: 1, caption: 'User', hint: "User name", value: ""},
-			{name: "cameraPassword", kind: "PasswordInput", flex: 1, caption: 'Password', hint: "User's password", value: ""},
-			{name: "cameraGet", kind: "ActivityButton", caption: "load", onclick: "cameraConnect", className: "enyo-button-dark"}
-    ]},
 
-    {name: "cameraControls", kind: "Toolbar", showing: false, components: [
-      {kind: "ToolButtonGroup", components: [
-        {name: "cameraLeft", kind: "Button", caption: "Left", move: 'left', onmousedown: "cameraMove", onmouseup: "cameraStop"},
-        {name: "cameraUp", kind: "Button", caption: "Up", move: 'up', onmousedown: "cameraMove", onmouseup: "cameraStop"},
-        {name: "cameraDown", kind: "Button", caption: "Down", move: 'down', onmousedown: "cameraMove", onmouseup: "cameraStop"},
-        {name: "cameraRight", kind: "Button", caption: "Right", move: 'right', onmousedown: "cameraMove", onmouseup: "cameraStop"}
-      ]}
-    ]},
+    {name: "webcamListPane", kind: "Webcam.WebcamList", onWebcamListTap: "cameraLaunch", onDeleteFeed: "deleteWebCam", onOpenCameraAdd: "openCameraAdd", showing: true},
 
-    {kind: "Image", src: "", style: "min-width:320px; max-width: 100%"}
+    {name: "webcamAddPane", kind: "Webcam.WebcamAdd", onCameraAdd: "cameraAdd", onCameraAddCancel: "cameraAddCancel", showing: false},
+
+    {kind: enyo.box, name: 'webcamContainer', components: [
+      {name: "cameraControls", kind: "Toolbar", showing: false, components: [
+        {kind: "ToolButtonGroup", components: [
+          {name: "cameraLeft", kind: "Button", caption: "Left", move: 'left', onmousedown: "cameraMove", onmouseup: "cameraStop"},
+          {name: "cameraUp", kind: "Button", caption: "Up", move: 'up', onmousedown: "cameraMove", onmouseup: "cameraStop"},
+          {name: "cameraDown", kind: "Button", caption: "Down", move: 'down', onmousedown: "cameraMove", onmouseup: "cameraStop"},
+          {name: "cameraRight", kind: "Button", caption: "Right", move: 'right', onmousedown: "cameraMove", onmouseup: "cameraStop"}
+        ]}
+      ]},
+
+      {kind: "Image", src: "", style: "min-width:320px; max-width: 100%"}
+    ]}
 
   ],
 
-	cameraConnect: function() {
+	ready: function() {
+    enyo.setAllowedOrientation('up');
+		this.webcamList = localStorage.getItem("webcamList");
+		if (this.webcamList == undefined) {
+			this.webcamList = [];
+		}
+    else {
+			this.webcamList = JSON.parse(this.webcamList);
+			this.$.webcamListPane.$.webcamList.render();
+		}
+	},
+
+	saveWebcamListList: function() {
+		localStorage.setItem("webcamList", JSON.stringify(this.webcamList));
+	},
+
+  cameraLaunch: function (inSender, inEvent) {
+    // Get camera settings.
+    var settings = this.webcamList[inEvent.rowIndex];
+    camera = new Camera(settings);
+    camera.activate();
+
+    this.$.webcamContainer.setShowing(true);
+    //console.log(this.$.webcamListPane);
+    this.$.webcamListPane.showing= false;
+  },
+
+  openCameraAdd: function() {
+    this.$.webcamListPane.setShowing(false);
+    this.$.webcamAddPane.setShowing(true);
+  },
+
+  cameraAdd: function() {
     var settings = {
-      'cameraURL': this.$.cameraURL.getValue(),
-      'cameraUser': this.$.cameraUser.getValue(),
-      'cameraPassword': this.$.cameraPassword.getValue(),
-      'id': 'webcam_image'
-    }
+      cameraTitle : this.$.cameraTitle.getValue(),
+      cameraURL: this.$.cameraURL.getValue(),
+      cameraUser: this.$.cameraUser.getValue(),
+      cameraPassword: this.$.cameraPassword.getValue(),
+      id: 'webcam_image'
+    };
 
     // Check to see if we got a valid camera image?
     camera = new Camera(settings);
@@ -42,21 +74,24 @@ enyo.kind({
     // Set a spinner.
 
     if (camera.validate()) {
-
-      // Remove spinner
-
-      camera.activate();
-
-      // Hide the settings.
-      this.$.cameraSettings.setShowing(false);
-      // Show the controls.
-      this.$.cameraControls.setShowing(true);
+      this.webcamList.push(settings);
+      this.saveWebcamListList();
+      this.$.webcamListContainer.setShowing(true);
+      this.$.addCamera.setShowing(false);
     }
     else {
-      // validation error
+      // ERROR, cancel
     }
 
-	},
+    // Close, return to list.
+  },
+
+  cameraAddCancel: function () {
+    // @TODO clear data from form.
+    this.$.webcamListContainer.setShowing(true);
+    this.$.webcamAddPane.setShowing(false);
+  },
+
 
   cameraMove: function (inSender, inEvent) {
     camera.move(inSender.move);
@@ -64,5 +99,6 @@ enyo.kind({
   cameraStop: function () {
     camera.move('stop');
   }
+
 
   });
