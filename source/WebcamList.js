@@ -4,16 +4,19 @@ enyo.kind({
 	layoutKind: enyo.VFlexLayout,
 
 	events: {
-		"onWebcamListTap": "",
-		"onNewFeedTap": "",
-		"onOpenCameraAdd": ""
+		"onOpenCameraAdd": "",
+    "onOpenCameraEdit": "",
+    "onCameraOpen": "",
+    "onCameraDelete": ""
 	},
+
 	components:[
-    {kind: enyo.VirtualRepeater, name: "webcamList", onSetupRow: "getWebcamList", onclick: "doWebcamListTap", components: [
-      {kind: enyo.SwipeableItem, onConfirm: "doDeleteWebcam", layoutKind: enyo.HFlexLayout, tapHighlight: true, components: [
-        {name: "webcamItemTitle", kind: "Button", caption: ""},
-        {name: "webcamItemEdit", content: ""},
-        {name: "webcamItemActive", content: ""}
+    {kind: "PageHeader", name: "header", content: "Web cameras"},
+    {kind: enyo.VirtualRepeater, name: "webcamList", onSetupRow: "getWebcamList", components: [
+      {kind: enyo.SwipeableItem, onConfirm: "doCameraDelete", layoutKind: enyo.HFlexLayout, tapHighlight: true, components: [
+        {name: "webcamItemTitle", kind: "Button", onclick: "doCameraOpen"},
+        {name: "webcamItemEdit", kind: "Button", content: "Edit", onclick: "doOpenCameraEdit"},
+        {name: "webcamItemActive", kind: "IconButton", content: "Active"}
       ]}
     ]},
 
