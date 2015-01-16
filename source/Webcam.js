@@ -4,11 +4,11 @@ enyo.kind({
 	components: [
 
     {kind: enyo.box, name: "webcamListContainer", components: [
-      {name: "webcamListPane", kind: "Webcam.WebcamList", onCameraOpen: "cameraOpen", onCameraDelete: "cameraDelete", onOpenCameraAdd: "openCameraAdd", onOpenCameraEdit: "openCameraEdit"}
+      {name: "webcamListPane", kind: "Webcam.WebcamList", onCameraOpen: "cameraOpen", onCameraDelete: "cameraDelete", onOpenCameraAdd: "openCameraAdd", onOpenCameraEdit: "openCameraEdit", onCameraSetDefault: "cameraSetDefault"}
     ]},
 
     {kind: enyo.box, name: "webcamAddContainer", showing: false, components: [
-      {name: "webcamAddPane", kind: "Webcam.WebcamAdd", onCameraAdd: "cameraAdd", onCameraAddCancel: "cameraAddCancel"},
+      {name: "webcamAddPane", kind: "Webcam.WebcamAdd", onCameraAdd: "cameraAdd", onCameraAddCancel: "cameraAddCancel"}
     ]},
 
     {kind: enyo.box, name: 'webcamContainer', showing: false, components: [
@@ -31,12 +31,16 @@ enyo.kind({
     this.camera = {};
 
     enyo.setAllowedOrientation('up');
+
 		this.webcamList = localStorage.getItem("webcamList");
 		if (this.webcamList == undefined) {
 			this.webcamList = [];
 		}
     else {
 			this.webcamList = JSON.parse(this.webcamList);
+
+      // Check for a camera set to default - render that
+
 			this.$.webcamListPane.$.webcamList.render();
 		}
 	},
@@ -54,7 +58,7 @@ enyo.kind({
     this.camera = new Camera(settings);
     this.camera.activate();
     this.$.webcamContainer.setShowing(true);
-    this.$.webcamListPane.$.webcamList.setShowing(false);
+    this.$.webcamListContainer.setShowing(false);
   },
 
   /**
@@ -86,7 +90,7 @@ enyo.kind({
       cameraPassword: this.$.webcamAddPane.$.cameraPassword.getValue(),
       id: 'webcam_image'
     };
-console.log(settings);
+
     // Check to see if we got a valid camera image?
     this.camera = new Camera(settings);
 
@@ -153,9 +157,25 @@ console.log(settings);
   /**
    * Delete a camera from the list.
    */
-  cameraDelete: function (inSender, inEvent) {
-    this.webcamList.splice(inEvent.index, 1);
+  cameraDelete: function (inSender, value) {
+    this.webcamList.splice(value, 1);
     this.saveWebcamListList();
+    // Rerender the list of cameras.
+    this.$.webcamListPane.$.webcamList.render();
+  },
+
+  /**
+   * Make the selected camera the default for the application.
+   */
+  cameraSetDefault: function (inSender, inEvent) {
+    for (var index in this.webcamList) {
+      this.webcamList[index].cameraDefault = false;
+    }
+
+    this.webcamList[inEvent.rowIndex].cameraDefault = true;
+
+    this.saveWebcamListList();
+
     // Rerender the list of cameras.
     this.$.webcamListPane.$.webcamList.render();
   }
