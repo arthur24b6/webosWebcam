@@ -16,15 +16,16 @@ enyo.kind({
     {kind: enyo.VirtualRepeater, name: "webcamList", onSetupRow: "getWebcamList", components: [
       {kind: enyo.SwipeableItem, onConfirm: "doCameraDelete", layoutKind: enyo.HFlexLayout, tapHighlight: true, components: [
         {name: "webcamItemTitle", kind: "Button", onclick: "doCameraOpen"},
-        {name: "webcamItemEdit", kind: "Button", content: "Edit", onclick: "doOpenCameraEdit"},
-        {name: "webcamItemDefault", kind: "Button", content: "Make default", onclick: "doCameraSetDefault"},
-        {name: "webcamItemStatus", kind: "ToggleButton", content: "Status", disabled: true, onLabel: "Active", offLabel: "Offline",}
+        {flex: 1},
+        {name: "webcamItemEdit", kind: "IconButton", icon: 'assets/icons/settings.png', onclick: "doOpenCameraEdit"},
+        {name: "webcamItemDefault", kind: "IconButton", icon: 'assets/icons/default_off.png', onclick: "doCameraSetDefault"},
+        {name: "webcamItemStatus", kind: "Image", src: "assets/icons/off.png"}
       ]}
     ]},
 
     {kind: enyo.Toolbar, name: "add", pack: "justify", components: [
       {flex: 1},
-      {icon: "images/menu-icon-new.png", onclick: "doOpenCameraAdd", align: "right"}
+      {icon: "assets/icons/add.png", onclick: "doOpenCameraAdd", align: "right"}
     ]}
   ],
 
@@ -35,12 +36,12 @@ enyo.kind({
 			this.$.webcamItemTitle.setContent(settings.cameraTitle);
 
       if (settings.cameraDefault) {
-        this.$.webcamItemDefault.setContent('Default camera');
+        this.$.webcamItemDefault.setIcon('assets/icons/default.png');
       }
 
       var camera = new Camera(settings);
       if (camera.validate()) {
-        this.$.webcamItemStatus.setState(true);
+        this.$.webcamItemStatus.setSrc("assets/icons/on.png");
 
       }
       else {
