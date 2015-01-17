@@ -16,3 +16,6 @@ vendor
 bin/*
 src
 spec
+
+# Ignore netbeans
+nbproject
